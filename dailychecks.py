@@ -471,8 +471,7 @@ def main():
         
         login(driver)
         
-
-        driver.save_screenshot('screenshot.png')
+        save_screenshot(driver,"TestDB","login.png")
         print("Screenshot saved.")
         
         
@@ -502,10 +501,6 @@ def main():
         time.sleep(10)
         
         save_screenshot(driver,"TestDB","CPU.png")
-        # while True:
-        #     True
-        
-        driver.save_screenshot('backups.png')
         print("Screenshot saved.")
         
 
