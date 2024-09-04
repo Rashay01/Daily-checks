@@ -451,6 +451,10 @@ def main():
     chrome_options = Options()
     # chrome_options.add_argument("--headless")  # Optional: Run in headless mode (no GUI)
     chrome_options.add_argument("--ignore-certificate-errors")  # Ignore certificate errors
+    chrome_options.add_argument("--start-maximized")
+ 
+    # Start Chrome with a fresh profile to clear cache
+    # chrome_options.add_argument("--incognito")
 
     # Automatically download and set up ChromeDriver (caching enabled)
     service = Service(ChromeDriverManager().install())
