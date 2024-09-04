@@ -8,6 +8,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from dotenv import load_dotenv
 import os
 import time
+import pandas as pd
 
 load_dotenv()
 
@@ -272,8 +273,10 @@ def click_button_by_value(driver, value):
         print(f"Error occurred while clicking the button with value '{value}'")
         # Reraise the exception to indicate failure
         raise
-    
-def selectDatabase(driver, groupName, databaseName):
+
+
+#-------------------------------------------------------------------------------------    
+def selectDatabase(driver, groupName, databaseName,fileLocation):
     try:
         click_image_by_id(driver,"shell-header-icon")
         print(f"Click group {groupName}")
@@ -290,7 +293,8 @@ def selectDatabase(driver, groupName, databaseName):
         time.sleep(20)
         
         print(f"Successfully selected database")
-        driver.save_screenshot('databaseSelected.png')
+        save_screenshot(driver,"TestDB","databaseSelected.png")
+        save_screenshot()
         print("databaseSelected Screenshot saved.")
     except Exception as e:
         print(f"Error occurred in Select Database")
@@ -444,6 +448,56 @@ def check_and_click_elements(driver, wait_time=10):
         raise
 
 
+#---------------------------------------------------------
+def create_excel_with_table_in_folder(folder_path, file_name):
+    """
+    Creates an Excel file with a predefined table in the specified folder.
+    
+    Args:
+    folder_path (str): The path to the folder where the Excel file should be created.
+    file_name (str): The name of the Excel file to be created.
+    """
+    # Ensure the folder exists
+    if not os.path.exists(folder_path):
+        os.makedirs(folder_path)
+
+    # Define the file path
+    file_path = os.path.join(folder_path, file_name)
+
+    # Check if the file already exists
+    if os.path.exists(file_path):
+        print(f"The file '{file_name}' already exists in the folder '{folder_path}'.")
+        return  # Exit the function to avoid overwriting the file
+
+    # Define the data
+    data = {
+        'Database check': [
+            'Check if service interrupted/Any inconsistencies with logging on',
+            'Memory/CPU usage',
+            'Disk space usage',
+            'DB lock check',
+            'System Dumps',
+            'Backup check',
+            'Certificate check'
+        ],
+        'Monday': ['', '', '', '', '', '', ''],
+        'Tuesday': ['', '', '', '', '', '', ''],
+        'Wednesday': ['', '', '', '', '', '', ''],
+        'Thursday': ['', '', '', '', '', '', ''],
+        'Friday': ['', '', '', '', '', '', ''],
+        'Saturday': ['', '', '', '', '', '', ''],
+        'Sunday': ['', '', '', '', '', '', '']
+    }
+
+    # Create a DataFrame from the data
+    df = pd.DataFrame(data)
+
+    # Write the DataFrame to an Excel file
+    with pd.ExcelWriter(file_path, engine='openpyxl') as writer:
+        df.to_excel(writer, sheet_name='Schedule', index=False)
+
+    print(f"Excel file '{file_path}' created successfully with the table.")
+
 def main():
     url = 'https://hanahcdbdev.mud.internal.co.za:39630/'  # Replace with the URL that triggers the warning
 
@@ -459,6 +513,7 @@ def main():
     # Automatically download and set up ChromeDriver (caching enabled)
     service = Service(ChromeDriverManager().install())
     driver = webdriver.Chrome(service=service, options=chrome_options)
+    create_excel_with_table_in_folder("TestDB","Output.xlsx")
 
     try:
         # Open the website
@@ -475,7 +530,7 @@ def main():
         print("Screenshot saved.")
         
         
-        selectDatabase(driver,"Training", "TESTDB@DHB")
+        selectDatabase(driver,"Training", "TESTDB@DHB","TestDB")
         
         check_and_click_elements(driver)
         
