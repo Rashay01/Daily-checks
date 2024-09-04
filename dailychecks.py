@@ -298,7 +298,7 @@ def selectDatabase(driver, groupName, databaseName):
 def login(driver):
     try:
         # Load username and password from environment variables
-        username = os.getenv('USERNAME')
+        username = os.getenv('USERNAME_1')
         password = os.getenv('PASSWORD')
 
         # Locate the username and password input fields
