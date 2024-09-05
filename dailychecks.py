@@ -9,6 +9,8 @@ from dotenv import load_dotenv
 import os
 import time
 import pandas as pd
+import openpyxl
+from openpyxl.styles import PatternFill
 
 load_dotenv()
 
@@ -275,6 +277,47 @@ def click_button_by_value(driver, value):
         raise
 
 
+def click_element_by_partial_id(driver, partial_id):
+    try:
+        # Wait for the element with the partial ID to be clickable
+        element = WebDriverWait(driver, 10).until(
+            EC.element_to_be_clickable((By.XPATH, f"//*[contains(@id, '{partial_id}')]"))
+        )
+
+        # Click the element
+        element.click()
+
+        # Optionally wait for a new tab to open (adjust the sleep time as needed)
+        time.sleep(2)
+
+        # Switch to the new tab (if applicable)
+        if len(driver.window_handles) > 1:
+            driver.switch_to.window(driver.window_handles[-1])
+
+        # Optionally wait for the page to load fully
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, '//*'))
+        )
+
+    except Exception as e:
+        print(f"An error occurred while clicking the element with partial ID '{partial_id}': {e}")
+        raise
+
+def get_text_by_partial_id(driver, partial_id):
+    try:
+        # Wait for the element with the partial ID to be present
+        element = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, f"//*[contains(@id, '{partial_id}')]"))
+        )
+
+        # Get the text from the element
+        text = element.text
+        return text
+
+    except Exception as e:
+        print(f"An error occurred while retrieving text from the element with partial ID '{partial_id}': {e}")
+        return None
+
 #-------------------------------------------------------------------------------------    
 def selectDatabase(driver, groupName, databaseName,fileLocation):
     try:
@@ -447,6 +490,17 @@ def check_and_click_elements(driver, wait_time=10):
         print(f"An error occurred: {e}")
         raise
 
+def check_last_update_successful(driver):
+    is_last_update_successful = False
+    sucText = get_text_by_partial_id(driver,"--backupDetailsStatus-text").strip()
+    
+    print("-"*100)
+    print(sucText)
+    if sucText.lower() == "successful":
+        is_last_update_successful = True
+    
+    return is_last_update_successful
+    
 
 #---------------------------------------------------------
 def create_excel_with_table_in_folder(folder_path, file_name):
@@ -494,9 +548,42 @@ def create_excel_with_table_in_folder(folder_path, file_name):
 
     # Write the DataFrame to an Excel file
     with pd.ExcelWriter(file_path, engine='openpyxl') as writer:
-        df.to_excel(writer, sheet_name='Schedule', index=False)
+        df.to_excel(writer, sheet_name='Daily Checks', index=False)
 
     print(f"Excel file '{file_path}' created successfully with the table.")
+
+def edit_excel(file_path, sheet_name, column_name, row_number, new_text):
+    try:
+        # Load the workbook and select the sheet
+        workbook = openpyxl.load_workbook(file_path)
+        sheet = workbook[sheet_name]
+
+        # Find the column index for the given column name
+        column_index = None
+        for cell in sheet[1]:  # Assuming the first row contains headers
+            if cell.value == column_name:
+                column_index = cell.column
+                break
+
+        if column_index is None:
+            raise ValueError(f"Column '{column_name}' not found.")
+
+        # Access the cell to edit
+        cell_to_edit = sheet.cell(row=row_number, column=column_index)
+
+        # Update the cell value
+        cell_to_edit.value = new_text
+
+        # Set the fill color to green
+        green_fill = PatternFill(start_color='00FF00', end_color='00FF00', fill_type='solid')
+        cell_to_edit.fill = green_fill
+
+        # Save the changes to the workbook
+        workbook.save(file_path)
+        print(f"Cell in row {row_number}, column '{column_name}' updated successfully.")
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
 
 def main():
     url = 'https://hanahcdbdev.mud.internal.co.za:39630/'  # Replace with the URL that triggers the warning
@@ -513,10 +600,12 @@ def main():
     # Automatically download and set up ChromeDriver (caching enabled)
     service = Service(ChromeDriverManager().install())
     driver = webdriver.Chrome(service=service, options=chrome_options)
+    
     create_excel_with_table_in_folder("TestDB","Output.xlsx")
 
     try:
         # Open the website
+        edit_excel("./TestDB/Output.xlsx",'Daily Checks',"Monday",4,"Completed")
         driver.get(url)
 
         # Bypass the security warning
@@ -531,6 +620,7 @@ def main():
         
         
         selectDatabase(driver,"Training", "TESTDB@DHB","TestDB")
+        # selectDatabase(driver,"Training", "DHB@DHB","TestDB")
         
         check_and_click_elements(driver)
         
@@ -540,11 +630,16 @@ def main():
         
         time.sleep(4)
         
-        click_element_by_text(driver,"Database ")
+        # click_element_by_text(driver,"Database ")
+        ans = check_last_update_successful(driver)
+        print(ans)
+        time.sleep(2)
+        
+        click_element_by_partial_id(driver,"--lastbackup")
         time.sleep(4)
         
+        
         save_screenshot(driver,"TestDB","Backups.png")
-        # while True:
         
         click_back_icon(driver)
         time.sleep(4)
