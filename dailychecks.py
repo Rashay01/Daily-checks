@@ -11,8 +11,19 @@ import time
 import pandas as pd
 import openpyxl
 from openpyxl.styles import PatternFill
+from datetime import datetime
 
 load_dotenv()
+
+
+def get_current_day_in_words():
+    # Get the current date
+    now = datetime.now()
+    
+    # Get the full name of the current day
+    day_name = now.strftime("%A")
+    
+    return day_name
 
 def bypass_security_warning(driver):
     try:
@@ -160,6 +171,9 @@ def click_element_by_text_js(driver, text, wait_time=10):
         """
         driver.execute_script(script)
         print(f"Element with text '{text}' clicked successfully using JavaScript.")
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, '//*'))
+        )
     except Exception as e:
         print(f"An error occurred while clicking {text} with JavaScript: {e}")
         raise
@@ -179,6 +193,9 @@ def click_element_when_ready(driver, text, wait_time=10):
         )
         element.click()
         print(f"Element with text '{text}' clicked successfully.")
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, '//*'))
+        )
     except Exception as e:
         print(f"An error occurred while waiting for and clicking {text}: {e}")
         raise
@@ -212,6 +229,9 @@ def scroll_and_click_by_text(driver, text, wait_time=10, max_scroll_attempts=20,
                 # Click the element
                 element.click()
                 print(f"Element with text '{text}' clicked successfully.")
+                WebDriverWait(driver, 10).until(
+                    EC.presence_of_element_located((By.XPATH, '//*'))
+                )
                 return  # Exit the function after successful click
             except:
                 # If the element is not found, scroll down incrementally and try again
@@ -242,6 +262,9 @@ def click_image_by_id(driver, image_id, wait_time=10):
         # Click the image element
         image_element.click()
         print(f"Image with ID '{image_id}' clicked successfully.")
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, '//*'))
+        )
 
     except Exception as e:
         print(f"An error occurred in clicking image: {image_id}")
@@ -336,7 +359,7 @@ def selectDatabase(driver, groupName, databaseName,fileLocation):
         time.sleep(20)
         
         print(f"Successfully selected database")
-        save_screenshot(driver,"TestDB","databaseSelected.png")
+        save_screenshot(driver,fileLocation,"databaseSelected.png")
         save_screenshot()
         print("databaseSelected Screenshot saved.")
     except Exception as e:
@@ -490,14 +513,21 @@ def check_and_click_elements(driver, wait_time=10):
         print(f"An error occurred: {e}")
         raise
 
-def check_last_update_successful(driver):
+def check_last_update_successful(driver, current_day):
     is_last_update_successful = False
+    is_correct_day = False
     sucText = get_text_by_partial_id(driver,"--backupDetailsStatus-text").strip()
     
     print("-"*100)
     print(sucText)
     if sucText.lower() == "successful":
         is_last_update_successful = True
+    
+    is_correct_day = True
+    if is_correct_day and is_last_update_successful:
+         edit_excel("./TestDB/Output.xlsx", "Daily Checks", current_day, 7, "Completed",1)
+    else:
+         edit_excel("./TestDB/Output.xlsx", "Daily Checks", current_day, 7, "Completed",-1)
     
     return is_last_update_successful
     
@@ -552,7 +582,7 @@ def create_excel_with_table_in_folder(folder_path, file_name):
 
     print(f"Excel file '{file_path}' created successfully with the table.")
 
-def edit_excel(file_path, sheet_name, column_name, row_number, new_text):
+def edit_excel(file_path, sheet_name, column_name, row_number, new_text, color):
     try:
         # Load the workbook and select the sheet
         workbook = openpyxl.load_workbook(file_path)
@@ -575,7 +605,15 @@ def edit_excel(file_path, sheet_name, column_name, row_number, new_text):
         cell_to_edit.value = new_text
 
         # Set the fill color to green
-        green_fill = PatternFill(start_color='00FF00', end_color='00FF00', fill_type='solid')
+        basic_color = '808080'
+        if color == 1:
+            basic_color = "00B050"
+        elif color == -1:
+            basic_color= "FF0000"
+        elif color == 0:
+            basic_color= "FFA500"
+            
+        green_fill = PatternFill(start_color=basic_color, end_color=basic_color, fill_type='solid')
         cell_to_edit.fill = green_fill
 
         # Save the changes to the workbook
@@ -593,19 +631,16 @@ def main():
     # chrome_options.add_argument("--headless")  # Optional: Run in headless mode (no GUI)
     chrome_options.add_argument("--ignore-certificate-errors")  # Ignore certificate errors
     chrome_options.add_argument("--start-maximized")
- 
-    # Start Chrome with a fresh profile to clear cache
-    # chrome_options.add_argument("--incognito")
 
-    # Automatically download and set up ChromeDriver (caching enabled)
     service = Service(ChromeDriverManager().install())
     driver = webdriver.Chrome(service=service, options=chrome_options)
-    
+    current_day = get_current_day_in_words()
     create_excel_with_table_in_folder("TestDB","Output.xlsx")
 
     try:
         # Open the website
-        edit_excel("./TestDB/Output.xlsx",'Daily Checks',"Monday",4,"Completed")
+        print('curr : ',current_day)
+        
         driver.get(url)
 
         # Bypass the security warning
@@ -614,10 +649,11 @@ def main():
         click_element_by_text(driver,"hana-cockpit")
         
         login(driver)
-        
+
         save_screenshot(driver,"TestDB","login.png")
         print("Screenshot saved.")
-        
+        # driver.execute_script("document.body.style.zoom='80%'")
+        # time.sleep(5)
         
         selectDatabase(driver,"Training", "TESTDB@DHB","TestDB")
         # selectDatabase(driver,"Training", "DHB@DHB","TestDB")
@@ -627,13 +663,15 @@ def main():
         # Search for backups 
         search_input_field(driver, 'idSearchFieldOVP-I', 'backups')
         click_element_by_id(driver, "idSearchFieldOVP-search")
-        
-        time.sleep(4)
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, '//*'))
+        )
+        # time.sleep(4)
         
         # click_element_by_text(driver,"Database ")
-        ans = check_last_update_successful(driver)
+        ans = check_last_update_successful(driver, current_day)
         print(ans)
-        time.sleep(2)
+        # time.sleep(2)
         
         click_element_by_partial_id(driver,"--lastbackup")
         time.sleep(4)
