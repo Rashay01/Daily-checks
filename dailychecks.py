@@ -35,17 +35,20 @@ def bypass_security_warning(driver):
             EC.element_to_be_clickable((By.XPATH, '//*[text()="Advanced"]'))
         )
         advanced_button.click()
-        
+
         # Wait for the "Proceed to [site] (unsafe)" link to be clickable and click it
         proceed_link = WebDriverWait(driver, 10).until(
-            EC.element_to_be_clickable((By.XPATH, '//*[text()="Proceed to [site] (unsafe)"]'))
+            EC.element_to_be_clickable(
+                (By.XPATH, '//*[text()="Proceed to [site] (unsafe)"]')
+            )
         )
         proceed_link.click()
 
         print("Bypassed security warning and proceeded to the site.")
-    
+
     except Exception as e:
         print(f"An error occurred while bypassing the security warning: {e}")
+
 
 def click_element_by_text(driver, text):
     try:
@@ -65,7 +68,7 @@ def click_element_by_text(driver, text):
 
         # Wait for the page to load fully (adjust as needed)
         WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.XPATH, '//*'))
+            EC.presence_of_element_located((By.XPATH, "//*"))
         )
 
         # # Take a screenshot
@@ -76,12 +79,15 @@ def click_element_by_text(driver, text):
     except Exception as e:
         print(f"An error on click: {text}")
         raise
-    
+
+
 def click_back_icon(driver):
     try:
         # Wait for the element with the specified class and style to be clickable
         element = WebDriverWait(driver, 10).until(
-            EC.element_to_be_clickable((By.CSS_SELECTOR, 'span.sapUshellShellHeadItmCntnt'))
+            EC.element_to_be_clickable(
+                (By.CSS_SELECTOR, "span.sapUshellShellHeadItmCntnt")
+            )
         )
 
         # Click the element
@@ -96,18 +102,19 @@ def click_back_icon(driver):
 
             # Wait for the page to load fully (adjust as needed)
             WebDriverWait(driver, 10).until(
-                EC.presence_of_element_located((By.XPATH, '//*'))
+                EC.presence_of_element_located((By.XPATH, "//*"))
             )
 
             # Optionally, take a screenshot
             # screenshot_path = 'screenshot_new_tab.png'
             # driver.save_screenshot(screenshot_path)
             # print(f'Screenshot of the new tab saved as {screenshot_path}.')
-        
+
     except Exception as e:
         print(f"An error occurred while clicking the element: {e}")
         raise
-    
+
+
 def click_element_by_id(driver, elementID, wait_for_element_xpath=None):
     try:
         # Wait for the element with the specified ID to be clickable
@@ -119,9 +126,7 @@ def click_element_by_id(driver, elementID, wait_for_element_xpath=None):
         element.click()
 
         # Wait for a new tab to open
-        WebDriverWait(driver, 10).until(
-            EC.number_of_windows_to_be(2)
-        )
+        WebDriverWait(driver, 10).until(EC.number_of_windows_to_be(2))
 
         # Switch to the new tab
         driver.switch_to.window(driver.window_handles[-1])
@@ -133,7 +138,7 @@ def click_element_by_id(driver, elementID, wait_for_element_xpath=None):
             )
         else:
             WebDriverWait(driver, 10).until(
-                EC.presence_of_element_located((By.XPATH, '//*'))
+                EC.presence_of_element_located((By.XPATH, "//*"))
             )
 
         # Optional: Take a screenshot
@@ -144,6 +149,7 @@ def click_element_by_id(driver, elementID, wait_for_element_xpath=None):
     except Exception as e:
         print(f"An error occurred while clicking element with ID '{elementID}': {e}")
         raise
+
 
 def click_element_by_text_js(driver, text, wait_time=10):
     """
@@ -156,7 +162,7 @@ def click_element_by_text_js(driver, text, wait_time=10):
     try:
         # Wait for the page to load
         WebDriverWait(driver, wait_time).until(
-            EC.presence_of_element_located((By.XPATH, '//*'))
+            EC.presence_of_element_located((By.XPATH, "//*"))
         )
 
         # Use JavaScript to find and click the element
@@ -177,6 +183,7 @@ def click_element_by_text_js(driver, text, wait_time=10):
     except Exception as e:
         print(f"An error occurred while clicking {text} with JavaScript: {e}")
         raise
+
 
 def click_element_when_ready(driver, text, wait_time=10):
     """
@@ -200,7 +207,10 @@ def click_element_when_ready(driver, text, wait_time=10):
         print(f"An error occurred while waiting for and clicking {text}: {e}")
         raise
 
-def scroll_and_click_by_text(driver, text, wait_time=10, max_scroll_attempts=20, scroll_increment=1):
+
+def scroll_and_click_by_text(
+    driver, text, wait_time=10, max_scroll_attempts=20, scroll_increment=1
+):
     """
     Scrolls down the page incrementally until an element with the specified text is found and clicks it.
 
@@ -237,27 +247,24 @@ def scroll_and_click_by_text(driver, text, wait_time=10, max_scroll_attempts=20,
                 # If the element is not found, scroll down incrementally and try again
                 driver.execute_script(f"window.scrollBy(0, {scroll_increment});")
                 time.sleep(2)  # Wait for the page to load new content
-        
+
         print(f"Element with text '{text}' not found after scrolling.")
     except Exception as e:
         print(f"An error occurred while scrolling and clicking {text}: {e}")
         raise
 
+
 def click_image_by_id(driver, image_id, wait_time=10):
     try:
         # Wait for the image element to be present
         wait = WebDriverWait(driver, wait_time)
-        image_element = wait.until(
-            EC.presence_of_element_located((By.ID, image_id))
-        )
+        image_element = wait.until(EC.presence_of_element_located((By.ID, image_id)))
 
         # Scroll to the image element using JavaScript
         driver.execute_script("arguments[0].scrollIntoView(true);", image_element)
 
         # Optional: Wait a bit to ensure the scrolling is done
-        WebDriverWait(driver, 2).until(
-            EC.element_to_be_clickable((By.ID, image_id))
-        )
+        WebDriverWait(driver, 2).until(EC.element_to_be_clickable((By.ID, image_id)))
 
         # Click the image element
         image_element.click()
@@ -270,11 +277,14 @@ def click_image_by_id(driver, image_id, wait_time=10):
         print(f"An error occurred in clicking image: {image_id}")
         raise
 
+
 def click_button_by_value(driver, value):
     try:
         # Locate the button using the 'value' attribute
         button = WebDriverWait(driver, 10).until(
-            EC.element_to_be_clickable((By.XPATH, f'//input[@type="submit" and @value="{value}"]'))
+            EC.element_to_be_clickable(
+                (By.XPATH, f'//input[@type="submit" and @value="{value}"]')
+            )
         )
 
         # Click the button
@@ -289,7 +299,7 @@ def click_button_by_value(driver, value):
 
         # Wait for the page to load fully (adjust as needed)
         WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.XPATH, '//*'))
+            EC.presence_of_element_located((By.XPATH, "//*"))
         )
 
         print(f'Button with value "{value}" clicked.')
@@ -304,7 +314,9 @@ def click_element_by_partial_id(driver, partial_id):
     try:
         # Wait for the element with the partial ID to be clickable
         element = WebDriverWait(driver, 10).until(
-            EC.element_to_be_clickable((By.XPATH, f"//*[contains(@id, '{partial_id}')]"))
+            EC.element_to_be_clickable(
+                (By.XPATH, f"//*[contains(@id, '{partial_id}')]")
+            )
         )
 
         # Click the element
@@ -319,18 +331,23 @@ def click_element_by_partial_id(driver, partial_id):
 
         # Optionally wait for the page to load fully
         WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.XPATH, '//*'))
+            EC.presence_of_element_located((By.XPATH, "//*"))
         )
 
     except Exception as e:
-        print(f"An error occurred while clicking the element with partial ID '{partial_id}': {e}")
+        print(
+            f"An error occurred while clicking the element with partial ID '{partial_id}': {e}"
+        )
         raise
+
 
 def get_text_by_partial_id(driver, partial_id):
     try:
         # Wait for the element with the partial ID to be present
         element = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.XPATH, f"//*[contains(@id, '{partial_id}')]"))
+            EC.presence_of_element_located(
+                (By.XPATH, f"//*[contains(@id, '{partial_id}')]")
+            )
         )
 
         # Get the text from the element
@@ -338,45 +355,53 @@ def get_text_by_partial_id(driver, partial_id):
         return text
 
     except Exception as e:
-        print(f"An error occurred while retrieving text from the element with partial ID '{partial_id}': {e}")
+        print(
+            f"An error occurred while retrieving text from the element with partial ID '{partial_id}': {e}"
+        )
         return None
 
-#-------------------------------------------------------------------------------------    
-def selectDatabase(driver, groupName, databaseName,fileLocation):
+
+# -------------------------------------------------------------------------------------
+def selectDatabase(driver, groupName, databaseName, fileLocation):
     try:
-        click_image_by_id(driver,"shell-header-icon")
+        click_image_by_id(driver, "shell-header-icon")
         print(f"Click group {groupName}")
         click_element_by_text(driver, groupName)
-        
+
         time.sleep(2)
-        
+
         print(f"Scroll and click {databaseName}")
         click_element_by_text_js(driver, databaseName)
-        
+
         WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.XPATH, '//*'))
+            EC.presence_of_element_located((By.XPATH, "//*"))
         )
         time.sleep(20)
-        
+
         print(f"Successfully selected database")
         save_screenshot(driver,fileLocation,"databaseSelected.png")
         save_screenshot()
         print("databaseSelected Screenshot saved.")
     except Exception as e:
         print(f"Error occurred in Select Database")
-    
+
+
 def login(driver):
     try:
         # Load username and password from environment variables
-        username = os.getenv('USERNAME_1')
-        password = os.getenv('PASSWORD')
+        username = os.getenv("USERNAME_1")
+        password = os.getenv("PASSWORD")
 
         # Locate the username and password input fields
         username_field = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.NAME, 'username'))  # Adjust selector as needed
+            EC.presence_of_element_located(
+                (By.NAME, "username")
+            )  # Adjust selector as needed
         )
         password_field = WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.NAME, 'password'))  # Adjust selector as needed
+            EC.presence_of_element_located(
+                (By.NAME, "password")
+            )  # Adjust selector as needed
         )
 
         # Input the username and password
@@ -386,48 +411,67 @@ def login(driver):
         # Submit the form or perform login action
         click_button_by_value(driver, "Log On")
 
-        print("Logged in successfully.")
-        
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, "//*"))
+        )
+
+        div_element = driver.find_element(By.ID, "__item0-anchorNavigationBar-0-inner")
+
+        # Get the text of the <div> element
+        div_text = div_element.text
+
+        # Check if the text matches "My Home"
+        if div_text == "My Home":
+            print('The text "My Home" is present in the div.')
+            print("Logged in successfully.")
+            return 1
+        else:
+            print('The text "My Home" is not present in the div.')
+            return -1
 
     except Exception as e:
         print(f"An error occurred during login: {e}")
+        return -1
+
 
 def check_and_click_elements(driver, wait_time=10):
     try:
         # Wait for the presence of the text elements
         wait = WebDriverWait(driver, wait_time)
-        
+
         # Check for the presence of the "Monitoring" text
         monitoring_element = wait.until(
             EC.presence_of_element_located((By.XPATH, '//span[text()="Monitoring"]'))
         )
-        
+
         # If "Monitoring" is found, click the associated button
         if monitoring_element:
             print("Text 'Monitoring' found.")
             # Locate and click the button associated with "Monitoring"
-            # 
-            click_element_by_id(driver, '__xmlview38--idVariantManagement-trigger-img')
+            #
+            click_element_by_id(driver, "__xmlview38--idVariantManagement-trigger-img")
             # button = driver.find_element(By.XPATH, '//span[@id="__xmlview188--idVariantManagement-trigger-inner"]')
             # button.click()
             print("Button associated with 'Monitoring' clicked.")
-        
+
         # Check for the presence of the "All" text
-        
+
         # If "All" is found, click the associated element
-            
+
         # click_element_by_text(driver, "All")
-        click_element_by_id(driver,'__xmlview38--idVariantManagement-trigger-item-1')
+        click_element_by_id(driver, "__xmlview38--idVariantManagement-trigger-item-1")
         print("Element with text 'All' clicked.")
-    
+        return True
+
     except Exception as e:
         print(f"An error occurred: {e}")
         raise
 
+
 def search_input_field(driver, input_id, search_query, wait_for_element_xpath=None):
     """
     Searches using an <input> field identified by its ID and optionally waits for a specific element to appear.
-    
+
     :param driver: The Selenium WebDriver instance.
     :param input_id: The ID of the <input> element used for search.
     :param search_query: The query string to send to the search input field.
@@ -455,15 +499,17 @@ def search_input_field(driver, input_id, search_query, wait_for_element_xpath=No
         # screenshot_path = f'screenshot_search_{search_query}.png'
         # driver.save_screenshot(screenshot_path)
         # print(f'Screenshot saved as {screenshot_path}.')
+        return True
 
     except Exception as e:
         print(f"An error occurred while searching with input ID '{input_id}': {e}")
-        raise  
-    
+        raise
+
+
 def save_screenshot(driver, folder_path, file_name):
     """
     Takes a screenshot and saves it to a specified folder with a given file name.
-    
+
     :param driver: The Selenium WebDriver instance.
     :param folder_path: The folder where the screenshot will be saved.
     :param file_name: The name of the screenshot file.
@@ -478,37 +524,40 @@ def save_screenshot(driver, folder_path, file_name):
 
         # Save the screenshot
         driver.save_screenshot(screenshot_path)
-        print(f'Screenshot saved as {screenshot_path}.')
+        print(f"Screenshot saved as {screenshot_path}.")
+        return True
 
     except Exception as e:
         print(f"An error occurred while saving the screenshot: {e}")
-        raise 
+        raise
+
 
 def check_and_click_elements(driver, wait_time=10):
     try:
         # Wait for the presence of the text elements
         wait = WebDriverWait(driver, wait_time)
-        
+
         # Check for the presence of the "Monitoring" text
-        
+
         # If "Monitoring" is found, click the associated button
-        
-        click_element_by_id(driver, '__xmlview38--idVariantManagement-trigger-img')
+
+        click_element_by_id(driver, "__xmlview38--idVariantManagement-trigger-img")
         # button = driver.find_element(By.XPATH, '//span[@id="__xmlview188--idVariantManagement-trigger-inner"]')
         # button.click()
         print("Button associated with 'Monitoring' clicked.")
         time.sleep(4)
-        
+
         # Check for the presence of the "All" text
-        
+
         # If "All" is found, click the associated element
-            
+
         # click_element_by_text(driver, "All")
-        click_element_by_id(driver,'__xmlview38--idVariantManagement-trigger-item-1')
+        click_element_by_id(driver, "__xmlview38--idVariantManagement-trigger-item-1")
         print("Element with text 'All' clicked.")
-        
+
         time.sleep(4)
-    
+        return True
+
     except Exception as e:
         print(f"An error occurred: {e}")
         raise
@@ -535,11 +584,11 @@ def check_last_update_successful(driver, current_day):
         return False
     
 
-#---------------------------------------------------------
+# ---------------------------------------------------------
 def create_excel_with_table_in_folder(folder_path, file_name):
     """
     Creates an Excel file with a predefined table in the specified folder.
-    
+
     Args:
     folder_path (str): The path to the folder where the Excel file should be created.
     file_name (str): The name of the Excel file to be created.
@@ -558,32 +607,34 @@ def create_excel_with_table_in_folder(folder_path, file_name):
 
     # Define the data
     data = {
-        'Database check': [
-            'Check if service interrupted/Any inconsistencies with logging on',
-            'Memory/CPU usage',
-            'Disk space usage',
-            'DB lock check',
-            'System Dumps',
-            'Backup check',
-            'Certificate check'
+        "Database check": [
+            "Check if service interrupted/Any inconsistencies with logging on",
+            "Memory/CPU usage",
+            "Disk space usage",
+            "DB lock check",
+            "System Dumps",
+            "Backup check",
+            "Certificate check",
         ],
-        'Monday': ['', '', '', '', '', '', ''],
-        'Tuesday': ['', '', '', '', '', '', ''],
-        'Wednesday': ['', '', '', '', '', '', ''],
-        'Thursday': ['', '', '', '', '', '', ''],
-        'Friday': ['', '', '', '', '', '', ''],
-        'Saturday': ['', '', '', '', '', '', ''],
-        'Sunday': ['', '', '', '', '', '', '']
+        "Monday": ["", "", "", "", "", "", ""],
+        "Tuesday": ["", "", "", "", "", "", ""],
+        "Wednesday": ["", "", "", "", "", "", ""],
+        "Thursday": ["", "", "", "", "", "", ""],
+        "Friday": ["", "", "", "", "", "", ""],
+        "Saturday": ["", "", "", "", "", "", ""],
+        "Sunday": ["", "", "", "", "", "", ""],
     }
 
     # Create a DataFrame from the data
     df = pd.DataFrame(data)
 
     # Write the DataFrame to an Excel file
-    with pd.ExcelWriter(file_path, engine='openpyxl') as writer:
-        df.to_excel(writer, sheet_name='Daily Checks', index=False)
+    with pd.ExcelWriter(file_path, engine="openpyxl") as writer:
+        df.to_excel(writer, sheet_name="Daily Checks", index=False)
 
     print(f"Excel file '{file_path}' created successfully with the table.")
+    return True
+
 
 def edit_excel(file_path, sheet_name, column_name, row_number, new_text, color):
     try:
@@ -622,17 +673,154 @@ def edit_excel(file_path, sheet_name, column_name, row_number, new_text, color):
         # Save the changes to the workbook
         workbook.save(file_path)
         print(f"Cell in row {row_number}, column '{column_name}' updated successfully.")
+        return True
 
     except Exception as e:
         print(f"An error occurred: {e}")
+        return False
+
+
+def open_html_in_browser(html_file):
+    driver = webdriver.Chrome()  # Ensure you have chromedriver installed
+    html_path = "report.html"
+    driver.get(html_path)
+
+
+# --------------------------------------------------------------------------
+from datetime import datetime
+
+
+def create_html_with_buttons(filename, function_statuses):
+    """
+    Creates an HTML file with buttons indicating the status of each function and includes images in the buttons.
+
+    :param filename: Name of the HTML file to be created
+    :param function_statuses: Dictionary with function names as keys and their statuses as values
+    """
+    html_template = """
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Function Status</title>
+        <style>
+            .button {{
+                padding: 10px 20px;
+                margin: 5px;
+                border: none;
+                font-size: 16px;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background-color: grey; /* Initial color */
+                color: white;
+                border-radius: 5px;
+                transition: background-color 0.3s ease;
+            }}
+            .success {{
+                background-color: green; /* Turns green when successful */
+            }}
+            .failure {{
+                background-color: red; /* Red for failure */
+            }}
+            .button img {{
+                max-width: 100px;
+                height: auto;
+                margin-right: 10px;
+            }}
+            .button a {{
+                text-decoration: none;
+                color: white;
+            }}
+        </style>
+    </head>
+    <body>
+        <h1>Function Status Report</h1>
+        <p>Generated on {timestamp}</p>
+        {buttons}
+    </body>
+    </html>
+    """
+
+    buttons = ""
+    for func_name, status in function_statuses.items():
+        # Handle boolean values as well as string statuses
+        if status == 1:
+            color_class = "success"
+        elif status == -1:
+            color_class = "failure"
+        elif status == 0:
+            color_class = "waring"
+        elif status == -2:
+            color_class = "norun"
+        # else:
+        #     color_class = "success" if status == "success" else "failure"
+
+        screenshot_path = ""  # Initialize to avoid UnboundLocalError
+
+        if func_name == "Save Screenshot" and status == "success":
+            # Get the screenshot path and use it in the button
+            screenshot_path = function_statuses.get("Screenshot Path", "")
+            # Add an anchor tag to open the screenshot in a new tab when clicked
+            image_html = f'<a href="{screenshot_path}" target="_blank"><img src="{screenshot_path}" alt="{func_name} Image"></a>'
+        else:
+            # Default image handling
+            image_html = (
+                f'<img src="{func_name.replace(" ", "_").lower()}.png" alt="{func_name} Image">'
+                if color_class == "success"
+                else ""
+            )
+
+        # Add the image inside the button
+        buttons += f'<button class="button {color_class}">{image_html}<a href="{screenshot_path}" target="_blank">{func_name}</a></button>\n'
+
+    # Fill the template with the timestamp and buttons
+    html_content = html_template.format(
+        timestamp=datetime.now().strftime("%Y-%m-%d %H:%M:%S"), buttons=buttons
+    )
+
+    with open(filename, "w") as file:
+        file.write(html_content)
+
+    print(f"HTML file '{filename}' created successfully.")
+
+
+#  -------------------------------------------------------------------------
+images = [
+    {"src": "TestDB/login.png", "alt": "Login"},
+    {"src": "TestDB/databaseSelected.png", "alt": "databaseSelected.png"},
+    {"src": "TestDB/Backups.png", "alt": "Backups.png"},
+    {"src": "TestDB/CPU.png", "alt": "CPU.png"},
+]
+
+
+def insert_images_into_html(file_path, images):
+    # Open and read the HTML file
+    with open(file_path, "r") as file:
+        html_content = file.readlines()
+
+    # Open the file in write mode
+    with open(file_path, "w") as file:
+        for line in html_content:
+            file.write(line)
+
+        # Insert images dynamically
+        for image in images:
+            img_tag = f'<img src="{image["src"]}" alt="{image["alt"]}" style="width:100%;max-width:300px;margin:10px 0;">\n'
+            file.write(img_tag)
+
+    print("Images inserted successfully!")
+
 
 def main():
-    url = 'https://hanahcdbdev.mud.internal.co.za:39630/'  # Replace with the URL that triggers the warning
+    url = "https://hanahcdbdev.mud.internal.co.za:39630/"  # Replace with the URL that triggers the warning
 
     # Set up Chrome options
     chrome_options = Options()
     # chrome_options.add_argument("--headless")  # Optional: Run in headless mode (no GUI)
-    chrome_options.add_argument("--ignore-certificate-errors")  # Ignore certificate errors
+    chrome_options.add_argument(
+        "--ignore-certificate-errors"
+    )  # Ignore certificate errors
     chrome_options.add_argument("--start-maximized")
 
     service = Service(ChromeDriverManager().install())
@@ -642,10 +830,15 @@ def main():
     create_excel_with_table_in_folder("TestDB","Output.xlsx")
 
     try:
+        # create_html_with_buttons("dynamic_buttons.html")
         # Open the website
         print('curr : ',current_day)
         
         driver.get(url)
+
+        # Setting up variables
+        loginans1 = -2
+        backup_ans = -2
 
         # Bypass the security warning
         bypass_security_warning(driver)
@@ -661,11 +854,11 @@ def main():
         
         selectDatabase(driver,"Training", "TESTDB@DHB","TestDB")
         # selectDatabase(driver,"Training", "DHB@DHB","TestDB")
-        
+
         check_and_click_elements(driver)
-        
-        # Search for backups 
-        search_input_field(driver, 'idSearchFieldOVP-I', 'backups')
+
+        # Search for backups
+        search_input_field(driver, "idSearchFieldOVP-I", "backups")
         click_element_by_id(driver, "idSearchFieldOVP-search")
         WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.XPATH, '//*'))
@@ -690,14 +883,14 @@ def main():
         
         click_back_icon(driver)
         time.sleep(4)
-        
-        # Search for CPU 
-        search_input_field(driver, 'idSearchFieldOVP-I', 'CPU')
+
+        # Search for CPU
+        search_input_field(driver, "idSearchFieldOVP-I", "CPU")
         click_element_by_id(driver, "idSearchFieldOVP-search")
-        
+
         time.sleep(10)
-        
-        save_screenshot(driver,"TestDB","CPU.png")
+
+        save_screenshot(driver, "TestDB", "CPU.png")
         print("Screenshot saved.")
         
         # Search for Alerts 
@@ -762,7 +955,13 @@ def main():
 
     finally:
         # Close the browser
+        function_statuses = {
+            "Login": loginans1,
+            "database_screenshot": backup_ans,
+        }
+        create_html_with_buttons("daily-checks.html", function_statuses)
         driver.quit()
+
 
 if __name__ == "__main__":
     main()
