@@ -514,22 +514,25 @@ def check_and_click_elements(driver, wait_time=10):
         raise
 
 def check_last_update_successful(driver, current_day):
-    is_last_update_successful = False
-    is_correct_day = False
-    sucText = get_text_by_partial_id(driver,"--backupDetailsStatus-text").strip()
-    
-    print("-"*100)
-    print(sucText)
-    if sucText.lower() == "successful":
-        is_last_update_successful = True
-    
-    is_correct_day = True
-    if is_correct_day and is_last_update_successful:
-         edit_excel("./TestDB/Output.xlsx", "Daily Checks", current_day, 7, "Completed",1)
-    else:
-         edit_excel("./TestDB/Output.xlsx", "Daily Checks", current_day, 7, "Completed",-1)
-    
-    return is_last_update_successful
+    try:
+        is_last_update_successful = False
+        is_correct_day = False
+        sucText = get_text_by_partial_id(driver,"--backupDetailsStatus-text").strip()
+        
+        if sucText.lower() == "successful":
+            is_last_update_successful = True
+        
+        is_correct_day = True
+        if is_correct_day and is_last_update_successful:
+            edit_excel("./TestDB/Output.xlsx", "Daily Checks", current_day, 7, "Completed",1)
+        else:
+            edit_excel("./TestDB/Output.xlsx", "Daily Checks", current_day, 7, "warning", 0)
+        
+        return is_last_update_successful
+    except Exception as e:
+        print('Failed to check database')
+        edit_excel("./TestDB/Output.xlsx", "Daily Checks", current_day, 7, "failed",-1)
+        return False
     
 
 #---------------------------------------------------------
@@ -634,6 +637,7 @@ def main():
 
     service = Service(ChromeDriverManager().install())
     driver = webdriver.Chrome(service=service, options=chrome_options)
+    driver.set_window_size(1920, 1580)
     current_day = get_current_day_in_words()
     create_excel_with_table_in_folder("TestDB","Output.xlsx")
 
@@ -666,18 +670,23 @@ def main():
         WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.XPATH, '//*'))
         )
-        # time.sleep(4)
         
-        # click_element_by_text(driver,"Database ")
-        ans = check_last_update_successful(driver, current_day)
-        print(ans)
-        # time.sleep(2)
+        backupSuccessful = check_last_update_successful(driver, current_day)
+        print("-"*100)
+        print("backups check", backupSuccessful)
         
         click_element_by_partial_id(driver,"--lastbackup")
+        
         time.sleep(4)
-        
-        
+        driver.execute_script("document.body.style.zoom='80%'")
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, '//*'))
+        )
         save_screenshot(driver,"TestDB","Backups.png")
+        driver.execute_script("document.body.style.zoom='100%';")
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, '//*'))
+        )
         
         click_back_icon(driver)
         time.sleep(4)
@@ -690,6 +699,62 @@ def main():
         
         save_screenshot(driver,"TestDB","CPU.png")
         print("Screenshot saved.")
+        
+        # Search for Alerts 
+        search_input_field(driver, 'idSearchFieldOVP-I', 'Alerts')
+        click_element_by_id(driver, "idSearchFieldOVP-search")
+        
+        time.sleep(10)
+        
+        save_screenshot(driver,"TestDB","Alerts.png")
+        print("Screenshot saved.")
+        
+        # Search for Services 
+        search_input_field(driver, 'idSearchFieldOVP-I', 'Services')
+        click_element_by_id(driver, "idSearchFieldOVP-search")
+        
+        time.sleep(10)
+        
+        save_screenshot(driver,"TestDB","Services.png")
+        print("Screenshot saved.")
+        
+        # Search for Memory U 
+        search_input_field(driver, 'idSearchFieldOVP-I', 'Memory U')
+        click_element_by_id(driver, "idSearchFieldOVP-search")
+        
+        time.sleep(10)
+        
+        save_screenshot(driver,"TestDB","Memory.png")
+        print("Screenshot saved.")
+        
+        # Search for Disk
+        search_input_field(driver, 'idSearchFieldOVP-I', 'Disk')
+        click_element_by_id(driver, "idSearchFieldOVP-search")
+        
+        time.sleep(10)
+        
+        save_screenshot(driver,"TestDB","Disk.png")
+        print("Screenshot saved.")
+        
+        # Search for Data Encryption
+        search_input_field(driver, 'idSearchFieldOVP-I', 'Data En')
+        click_element_by_id(driver, "idSearchFieldOVP-search")
+        
+        time.sleep(10)
+        
+        save_screenshot(driver,"TestDB","Encryption.png")
+        print("Screenshot saved.")
+        
+        # Search for Trust Configuration - Certification
+        search_input_field(driver, 'idSearchFieldOVP-I', 'Trust Configuration')
+        click_element_by_id(driver, "idSearchFieldOVP-search")
+        
+        time.sleep(10)
+        
+        save_screenshot(driver,"TestDB","Certification.png")
+        print("Screenshot saved.")
+        
+        
         
 
     except Exception as e:
