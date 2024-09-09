@@ -477,7 +477,16 @@ def save_screenshot(driver, folder_path, file_name):
         screenshot_path = os.path.join(folder_path, file_name)
 
         # Save the screenshot
+        driver.execute_script("document.body.style.zoom='80%'")
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, '//*'))
+        )
         driver.save_screenshot(screenshot_path)
+        
+        driver.execute_script("document.body.style.zoom='100%'")
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, '//*'))
+        )
         print(f'Screenshot saved as {screenshot_path}.')
 
     except Exception as e:
@@ -517,22 +526,50 @@ def check_last_update_successful(driver, current_day):
     try:
         is_last_update_successful = False
         is_correct_day = False
-        sucText = get_text_by_partial_id(driver,"--backupDetailsStatus-text").strip()
-        
+        sucText = get_text_by_partial_id(driver, "--backupDetailsStatus-text").strip()
+
         if sucText.lower() == "successful":
             is_last_update_successful = True
-        
+
         is_correct_day = True
         if is_correct_day and is_last_update_successful:
-            edit_excel("./TestDB/Output.xlsx", "Daily Checks", current_day, 7, "Completed",1)
+            edit_excel(
+                "./TestDB/Output.xlsx", "Daily Checks", current_day, 7, "Completed", 1
+            )
         else:
-            edit_excel("./TestDB/Output.xlsx", "Daily Checks", current_day, 7, "warning", 0)
-        
-        return is_last_update_successful
+            edit_excel(
+                "./TestDB/Output.xlsx", "Daily Checks", current_day, 7, sucText, 0
+            )
+            
+        print("Backups: ",sucText)
+        return is_last_update_successful, sucText
     except Exception as e:
-        print('Failed to check database')
-        edit_excel("./TestDB/Output.xlsx", "Daily Checks", current_day, 7, "failed",-1)
-        return False
+        print("Backups: Failed")
+        edit_excel("./TestDB/Output.xlsx", "Daily Checks", current_day, 7, "failed", -1)
+        return False, None
+
+
+def check_Encryption_On(driver, current_day):
+    try:
+        encryption_1 = get_text_by_partial_id(driver,"__switch0-text")
+        encryption_2 = get_text_by_partial_id(driver,"__switch1-text")
+        encryption_3 = get_text_by_partial_id(driver,"__switch2-text")
+        
+        if (encryption_1 == "ON" and encryption_2 == "ON" and encryption_3 == "ON"):
+            edit_excel("./TestDB/Output.xlsx", "Daily Checks", current_day, 9, "Completed",1)
+            return 1, "Success"
+        
+        if (encryption_1 == "OFF" and encryption_2 == "OFF" and encryption_3 == "OFF"):
+            edit_excel("./TestDB/Output.xlsx", "Daily Checks", current_day, 9, "All Encryption is OFF",1)
+            return -1, "ALL encryption is off"
+        
+        edit_excel("./TestDB/Output.xlsx", "Daily Checks", current_day, 9, "Some encryption is off",1)
+        print('Encryption Test: Succeeded')
+        return 0, "Some encryption is off"
+    except Exception as e:
+        edit_excel("./TestDB/Output.xlsx", "Daily Checks", current_day, 9, "Failed",1)
+        print('Encryption Test: Failed')
+        raise
     
 
 #---------------------------------------------------------
@@ -565,15 +602,16 @@ def create_excel_with_table_in_folder(folder_path, file_name):
             'DB lock check',
             'System Dumps',
             'Backup check',
-            'Certificate check'
+            'Certificate check',
+            'Encryption'
         ],
-        'Monday': ['', '', '', '', '', '', ''],
-        'Tuesday': ['', '', '', '', '', '', ''],
-        'Wednesday': ['', '', '', '', '', '', ''],
-        'Thursday': ['', '', '', '', '', '', ''],
-        'Friday': ['', '', '', '', '', '', ''],
-        'Saturday': ['', '', '', '', '', '', ''],
-        'Sunday': ['', '', '', '', '', '', '']
+        'Monday': ['', '', '', '', '', '', '', ''],
+        'Tuesday': ['', '', '', '', '', '', '', ''],
+        'Wednesday': ['', '', '', '', '', '', '', ''],
+        'Thursday': ['', '', '', '', '', '', '', ''],
+        'Friday': ['', '', '', '', '', '', '', ''],
+        'Saturday': ['', '', '', '', '', '', '', ''],
+        'Sunday': ['', '', '', '', '', '', '', '']
     }
 
     # Create a DataFrame from the data
@@ -655,9 +693,6 @@ def main():
         login(driver)
 
         save_screenshot(driver,"TestDB","login.png")
-        print("Screenshot saved.")
-        # driver.execute_script("document.body.style.zoom='80%'")
-        # time.sleep(5)
         
         selectDatabase(driver,"Training", "TESTDB@DHB","TestDB")
         # selectDatabase(driver,"Training", "DHB@DHB","TestDB")
@@ -672,22 +707,9 @@ def main():
         )
         
         backupSuccessful = check_last_update_successful(driver, current_day)
-        print("-"*100)
-        print("backups check", backupSuccessful)
         
         click_element_by_partial_id(driver,"--lastbackup")
-        
-        time.sleep(4)
-        driver.execute_script("document.body.style.zoom='80%'")
-        WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.XPATH, '//*'))
-        )
         save_screenshot(driver,"TestDB","Backups.png")
-        driver.execute_script("document.body.style.zoom='100%';")
-        WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.XPATH, '//*'))
-        )
-        
         click_back_icon(driver)
         time.sleep(4)
         
@@ -698,7 +720,6 @@ def main():
         time.sleep(10)
         
         save_screenshot(driver,"TestDB","CPU.png")
-        print("Screenshot saved.")
         
         # Search for Alerts 
         search_input_field(driver, 'idSearchFieldOVP-I', 'Alerts')
@@ -707,7 +728,6 @@ def main():
         time.sleep(10)
         
         save_screenshot(driver,"TestDB","Alerts.png")
-        print("Screenshot saved.")
         
         # Search for Services 
         search_input_field(driver, 'idSearchFieldOVP-I', 'Services')
@@ -716,7 +736,6 @@ def main():
         time.sleep(10)
         
         save_screenshot(driver,"TestDB","Services.png")
-        print("Screenshot saved.")
         
         # Search for Memory U 
         search_input_field(driver, 'idSearchFieldOVP-I', 'Memory U')
@@ -725,7 +744,6 @@ def main():
         time.sleep(10)
         
         save_screenshot(driver,"TestDB","Memory.png")
-        print("Screenshot saved.")
         
         # Search for Disk
         search_input_field(driver, 'idSearchFieldOVP-I', 'Disk')
@@ -734,16 +752,18 @@ def main():
         time.sleep(10)
         
         save_screenshot(driver,"TestDB","Disk.png")
-        print("Screenshot saved.")
         
         # Search for Data Encryption
         search_input_field(driver, 'idSearchFieldOVP-I', 'Data En')
         click_element_by_id(driver, "idSearchFieldOVP-search")
         
-        time.sleep(10)
+        time.sleep(2)
+        click_element_by_text(driver,"cryption")
+        sucEncryption, EncryptionText =check_Encryption_On(driver,current_day)
         
+        time.sleep(5)
         save_screenshot(driver,"TestDB","Encryption.png")
-        print("Screenshot saved.")
+        click_back_icon(driver)
         
         # Search for Trust Configuration - Certification
         search_input_field(driver, 'idSearchFieldOVP-I', 'Trust Configuration')
@@ -752,7 +772,6 @@ def main():
         time.sleep(10)
         
         save_screenshot(driver,"TestDB","Certification.png")
-        print("Screenshot saved.")
         
         
         
