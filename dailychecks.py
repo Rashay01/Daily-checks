@@ -19,11 +19,12 @@ load_dotenv()
 def get_current_day_in_words():
     # Get the current date
     now = datetime.now()
-    
+
     # Get the full name of the current day
     day_name = now.strftime("%A")
-    
+
     return day_name
+
 
 def bypass_security_warning(driver):
     try:
@@ -178,7 +179,7 @@ def click_element_by_text_js(driver, text, wait_time=10):
         driver.execute_script(script)
         print(f"Element with text '{text}' clicked successfully using JavaScript.")
         WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.XPATH, '//*'))
+            EC.presence_of_element_located((By.XPATH, "//*"))
         )
     except Exception as e:
         print(f"An error occurred while clicking {text} with JavaScript: {e}")
@@ -201,7 +202,7 @@ def click_element_when_ready(driver, text, wait_time=10):
         element.click()
         print(f"Element with text '{text}' clicked successfully.")
         WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.XPATH, '//*'))
+            EC.presence_of_element_located((By.XPATH, "//*"))
         )
     except Exception as e:
         print(f"An error occurred while waiting for and clicking {text}: {e}")
@@ -240,7 +241,7 @@ def scroll_and_click_by_text(
                 element.click()
                 print(f"Element with text '{text}' clicked successfully.")
                 WebDriverWait(driver, 10).until(
-                    EC.presence_of_element_located((By.XPATH, '//*'))
+                    EC.presence_of_element_located((By.XPATH, "//*"))
                 )
                 return  # Exit the function after successful click
             except:
@@ -270,7 +271,7 @@ def click_image_by_id(driver, image_id, wait_time=10):
         image_element.click()
         print(f"Image with ID '{image_id}' clicked successfully.")
         WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.XPATH, '//*'))
+            EC.presence_of_element_located((By.XPATH, "//*"))
         )
 
     except Exception as e:
@@ -379,9 +380,10 @@ def selectDatabase(driver, groupName, databaseName, fileLocation):
         time.sleep(20)
 
         print(f"Successfully selected database")
-        save_screenshot(driver,fileLocation,"databaseSelected.png")
+        save_screenshot(driver, fileLocation, "databaseSelected.png")
         save_screenshot()
         print("databaseSelected Screenshot saved.")
+
     except Exception as e:
         print(f"Error occurred in Select Database")
 
@@ -389,7 +391,7 @@ def selectDatabase(driver, groupName, databaseName, fileLocation):
 def login(driver):
     try:
         # Load username and password from environment variables
-        username = os.getenv("USERNAME_1")
+        username = os.getenv("USERNAME_2")
         password = os.getenv("PASSWORD")
 
         # Locate the username and password input fields
@@ -414,14 +416,14 @@ def login(driver):
         WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.XPATH, "//*"))
         )
-
-        div_element = driver.find_element(By.ID, "__item0-anchorNavigationBar-0-inner")
-
-        # Get the text of the <div> element
-        div_text = div_element.text
+        # time.sleep(4)
+        wait = WebDriverWait(driver, 10)
+        image_element = wait.until(
+            EC.presence_of_element_located((By.ID, "shell-header-icon"))
+        )
 
         # Check if the text matches "My Home"
-        if div_text == "My Home":
+        if image_element:
             print('The text "My Home" is present in the div.')
             print("Logged in successfully.")
             return 1
@@ -562,27 +564,32 @@ def check_and_click_elements(driver, wait_time=10):
         print(f"An error occurred: {e}")
         raise
 
+
 def check_last_update_successful(driver, current_day):
     try:
         is_last_update_successful = False
         is_correct_day = False
-        sucText = get_text_by_partial_id(driver,"--backupDetailsStatus-text").strip()
-        
+        sucText = get_text_by_partial_id(driver, "--backupDetailsStatus-text").strip()
+
         if sucText.lower() == "successful":
             is_last_update_successful = True
-        
+
         is_correct_day = True
         if is_correct_day and is_last_update_successful:
-            edit_excel("./TestDB/Output.xlsx", "Daily Checks", current_day, 7, "Completed",1)
+            edit_excel(
+                "./TestDB/Output.xlsx", "Daily Checks", current_day, 7, "Completed", 1
+            )
         else:
-            edit_excel("./TestDB/Output.xlsx", "Daily Checks", current_day, 7, "warning", 0)
-        
-        return is_last_update_successful
+            edit_excel(
+                "./TestDB/Output.xlsx", "Daily Checks", current_day, 7, sucText, 0
+            )
+
+        return is_last_update_successful, sucText
     except Exception as e:
-        print('Failed to check database')
-        edit_excel("./TestDB/Output.xlsx", "Daily Checks", current_day, 7, "failed",-1)
-        return False
-    
+        print("Failed to check database")
+        edit_excel("./TestDB/Output.xlsx", "Daily Checks", current_day, 7, "failed", -1)
+        return False, None
+
 
 # ---------------------------------------------------------
 def create_excel_with_table_in_folder(folder_path, file_name):
@@ -635,6 +642,8 @@ def create_excel_with_table_in_folder(folder_path, file_name):
     print(f"Excel file '{file_path}' created successfully with the table.")
     return True
 
+    return True
+
 
 def edit_excel(file_path, sheet_name, column_name, row_number, new_text, color):
     try:
@@ -659,15 +668,17 @@ def edit_excel(file_path, sheet_name, column_name, row_number, new_text, color):
         cell_to_edit.value = new_text
 
         # Set the fill color to green
-        basic_color = '808080'
+        basic_color = "808080"
         if color == 1:
             basic_color = "00B050"
         elif color == -1:
-            basic_color= "FF0000"
+            basic_color = "FF0000"
         elif color == 0:
-            basic_color= "FFA500"
-            
-        green_fill = PatternFill(start_color=basic_color, end_color=basic_color, fill_type='solid')
+            basic_color = "FFA500"
+
+        green_fill = PatternFill(
+            start_color=basic_color, end_color=basic_color, fill_type="solid"
+        )
         cell_to_edit.fill = green_fill
 
         # Save the changes to the workbook
@@ -709,10 +720,7 @@ def create_html_with_buttons(filename, function_statuses):
                 border: none;
                 font-size: 16px;
                 cursor: pointer;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                background-color: grey; /* Initial color */
+                background-color: grey; /* default color */
                 color: white;
                 border-radius: 5px;
                 transition: background-color 0.3s ease;
@@ -723,10 +731,8 @@ def create_html_with_buttons(filename, function_statuses):
             .failure {{
                 background-color: red; /* Red for failure */
             }}
-            .button img {{
-                max-width: 100px;
-                height: auto;
-                margin-right: 10px;
+            .warning {{
+                background-color: #ffc107; /* Yellow for warning */
             }}
             .button a {{
                 text-decoration: none;
@@ -738,6 +744,11 @@ def create_html_with_buttons(filename, function_statuses):
         <h1>Function Status Report</h1>
         <p>Generated on {timestamp}</p>
         {buttons}
+        <script>
+            function openImage(imagePath) {{
+                window.open(imagePath, '_blank');
+            }}
+        </script>
     </body>
     </html>
     """
@@ -750,7 +761,7 @@ def create_html_with_buttons(filename, function_statuses):
         elif status == -1:
             color_class = "failure"
         elif status == 0:
-            color_class = "waring"
+            color_class = "warning"
         elif status == -2:
             color_class = "norun"
         # else:
@@ -758,21 +769,14 @@ def create_html_with_buttons(filename, function_statuses):
 
         screenshot_path = ""  # Initialize to avoid UnboundLocalError
 
-        if func_name == "Save Screenshot" and status == "success":
-            # Get the screenshot path and use it in the button
-            screenshot_path = function_statuses.get("Screenshot Path", "")
-            # Add an anchor tag to open the screenshot in a new tab when clicked
-            image_html = f'<a href="{screenshot_path}" target="_blank"><img src="{screenshot_path}" alt="{func_name} Image"></a>'
-        else:
-            # Default image handling
-            image_html = (
-                f'<img src="{func_name.replace(" ", "_").lower()}.png" alt="{func_name} Image">'
-                if color_class == "success"
-                else ""
-            )
+        if isinstance(status, tuple):
+            status, screenshot_path = status
 
-        # Add the image inside the button
-        buttons += f'<button class="button {color_class}">{image_html}<a href="{screenshot_path}" target="_blank">{func_name}</a></button>\n'
+        # Add the button with text and link to the full-screen image
+        if screenshot_path:
+            buttons += f'<button class="button {color_class}" onclick="openImage(\'{screenshot_path}\')">{func_name}</button>\n'
+        else:
+            buttons += f'<button class="button {color_class}">{func_name}</button>\n'
 
     # Fill the template with the timestamp and buttons
     html_content = html_template.format(
@@ -827,32 +831,44 @@ def main():
     driver = webdriver.Chrome(service=service, options=chrome_options)
     driver.set_window_size(1920, 1580)
     current_day = get_current_day_in_words()
-    create_excel_with_table_in_folder("TestDB","Output.xlsx")
+    create_excel_with_table_in_folder("TestDB", "Output.xlsx")
 
     try:
         # create_html_with_buttons("dynamic_buttons.html")
         # Open the website
-        print('curr : ',current_day)
-        
+        print("curr : ", current_day)
+
         driver.get(url)
 
-        # Setting up variables
         loginans1 = -2
         backup_ans = -2
+        loginpic = -2
+        backupSuccessful = -2
+        Alerts = -2
+        CPUans = -2
+        Services = -2
+        Memory = -2
+        Disk = -2
+        Data_Encryption = -2
+        Trust_Configuration = -2
 
         # Bypass the security warning
         bypass_security_warning(driver)
-        
-        click_element_by_text(driver,"hana-cockpit")
-        
-        login(driver)
 
-        save_screenshot(driver,"TestDB","login.png")
+        click_element_by_text(driver, "hana-cockpit")
+
+        loginans1 = login(driver)
+        print(loginans1)
+
+        if not loginans1:
+            raise ValueError("Failed login")
+
+        # perform_checks(driver, ans1)
+
+        loginpic = save_screenshot(driver, "TestDB", "login.png")
         print("Screenshot saved.")
-        # driver.execute_script("document.body.style.zoom='80%'")
-        # time.sleep(5)
-        
-        selectDatabase(driver,"Training", "TESTDB@DHB","TestDB")
+
+        selectDatabase(driver, "Training", "TESTDB@DHB", "TestDB")
         # selectDatabase(driver,"Training", "DHB@DHB","TestDB")
 
         check_and_click_elements(driver)
@@ -861,26 +877,26 @@ def main():
         search_input_field(driver, "idSearchFieldOVP-I", "backups")
         click_element_by_id(driver, "idSearchFieldOVP-search")
         WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.XPATH, '//*'))
+            EC.presence_of_element_located((By.XPATH, "//*"))
         )
-        
-        backupSuccessful = check_last_update_successful(driver, current_day)
-        print("-"*100)
+
+        backupSuccessful, backUpText = check_last_update_successful(driver, current_day)
+        print("-" * 100)
         print("backups check", backupSuccessful)
-        
-        click_element_by_partial_id(driver,"--lastbackup")
-        
+
+        click_element_by_partial_id(driver, "--lastbackup")
+
         time.sleep(4)
         driver.execute_script("document.body.style.zoom='80%'")
         WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.XPATH, '//*'))
+            EC.presence_of_element_located((By.XPATH, "//*"))
         )
-        save_screenshot(driver,"TestDB","Backups.png")
+        save_screenshot(driver, "TestDB", "Backups.png")
         driver.execute_script("document.body.style.zoom='100%';")
         WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.XPATH, '//*'))
+            EC.presence_of_element_located((By.XPATH, "//*"))
         )
-        
+
         click_back_icon(driver)
         time.sleep(4)
 
@@ -890,65 +906,62 @@ def main():
 
         time.sleep(10)
 
-        save_screenshot(driver, "TestDB", "CPU.png")
+        CPU_image = save_screenshot(driver, "TestDB", "CPU.png")
         print("Screenshot saved.")
-        
-        # Search for Alerts 
-        search_input_field(driver, 'idSearchFieldOVP-I', 'Alerts')
+
+        # Search for Alerts
+        search_input_field(driver, "idSearchFieldOVP-I", "Alerts")
         click_element_by_id(driver, "idSearchFieldOVP-search")
-        
+
         time.sleep(10)
-        
-        save_screenshot(driver,"TestDB","Alerts.png")
+
+        Alerts_image = save_screenshot(driver, "TestDB", "Alerts.png")
         print("Screenshot saved.")
-        
-        # Search for Services 
-        search_input_field(driver, 'idSearchFieldOVP-I', 'Services')
+
+        # Search for Services
+        search_input_field(driver, "idSearchFieldOVP-I", "Services")
         click_element_by_id(driver, "idSearchFieldOVP-search")
-        
+
         time.sleep(10)
-        
-        save_screenshot(driver,"TestDB","Services.png")
+
+        Services_image = save_screenshot(driver, "TestDB", "Services.png")
         print("Screenshot saved.")
-        
-        # Search for Memory U 
-        search_input_field(driver, 'idSearchFieldOVP-I', 'Memory U')
+
+        # Search for Memory U
+        search_input_field(driver, "idSearchFieldOVP-I", "Memory U")
         click_element_by_id(driver, "idSearchFieldOVP-search")
-        
+
         time.sleep(10)
-        
-        save_screenshot(driver,"TestDB","Memory.png")
+
+        Memory_image = save_screenshot(driver, "TestDB", "Memory.png")
         print("Screenshot saved.")
-        
+
         # Search for Disk
-        search_input_field(driver, 'idSearchFieldOVP-I', 'Disk')
+        search_input_field(driver, "idSearchFieldOVP-I", "Disk")
         click_element_by_id(driver, "idSearchFieldOVP-search")
-        
+
         time.sleep(10)
-        
-        save_screenshot(driver,"TestDB","Disk.png")
+
+        Disk_image = save_screenshot(driver, "TestDB", "Disk.png")
         print("Screenshot saved.")
-        
+
         # Search for Data Encryption
-        search_input_field(driver, 'idSearchFieldOVP-I', 'Data En')
+        search_input_field(driver, "idSearchFieldOVP-I", "Data En")
         click_element_by_id(driver, "idSearchFieldOVP-search")
-        
+
         time.sleep(10)
-        
-        save_screenshot(driver,"TestDB","Encryption.png")
+
+        Data_Encryption_image = save_screenshot(driver, "TestDB", "Encryption.png")
         print("Screenshot saved.")
-        
+
         # Search for Trust Configuration - Certification
-        search_input_field(driver, 'idSearchFieldOVP-I', 'Trust Configuration')
+        search_input_field(driver, "idSearchFieldOVP-I", "Trust Configuration")
         click_element_by_id(driver, "idSearchFieldOVP-search")
-        
+
         time.sleep(10)
-        
-        save_screenshot(driver,"TestDB","Certification.png")
+
+        Certification_image = save_screenshot(driver, "TestDB", "Certification.png")
         print("Screenshot saved.")
-        
-        
-        
 
     except Exception as e:
         print(f"An error occurred: {e}")
@@ -957,7 +970,16 @@ def main():
         # Close the browser
         function_statuses = {
             "Login": loginans1,
-            "database_screenshot": backup_ans,
+            "Logged in": (loginpic, "TestDB/login.png"),
+            "Database_screenshot": backup_ans,
+            "Back up : " + backUpText: backupSuccessful,
+            "CPU": (CPU_image, "TestDB/CPU.png"),
+            "Alerts": (Alerts_image, "TestDB/Alerts.png"),
+            "Services": (Services_image, "TestDB/Services.png"),
+            "Memory": (Services_image, "TestDB/Memory.png"),
+            "Disk": (Disk_image, "TestDB/Disk.png"),
+            "Data Encryption": (Data_Encryption_image, "TestDB/Encryption.png"),
+            "Trust Configuration": (Certification_image, "TestDB/Certification.png"),
         }
         create_html_with_buttons("daily-checks.html", function_statuses)
         driver.quit()
