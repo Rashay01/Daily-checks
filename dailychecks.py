@@ -525,9 +525,17 @@ def save_screenshot(driver, folder_path, file_name):
         screenshot_path = os.path.join(folder_path, file_name)
 
         # Save the screenshot
+        driver.execute_script("document.body.style.zoom='80%'")
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, '//*'))
+        )
         driver.save_screenshot(screenshot_path)
-        print(f"Screenshot saved as {screenshot_path}.")
-        return True
+        
+        driver.execute_script("document.body.style.zoom='100%'")
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, '//*'))
+        )
+        print(f'Screenshot saved as {screenshot_path}.')
 
     except Exception as e:
         print(f"An error occurred while saving the screenshot: {e}")
@@ -580,16 +588,14 @@ def check_last_update_successful(driver, current_day):
                 "./TestDB/Output.xlsx", "Daily Checks", current_day, 7, "Completed", 1
             )
         else:
-            edit_excel(
-                "./TestDB/Output.xlsx", "Daily Checks", current_day, 7, sucText, 0
-            )
-
-        return is_last_update_successful, sucText
+            edit_excel("./TestDB/Output.xlsx", "Daily Checks", current_day, 7, "warning", 0)
+        
+        return is_last_update_successful
     except Exception as e:
-        print("Failed to check database")
-        edit_excel("./TestDB/Output.xlsx", "Daily Checks", current_day, 7, "failed", -1)
-        return False, None
-
+        print('Failed to check database')
+        edit_excel("./TestDB/Output.xlsx", "Daily Checks", current_day, 7, "failed",-1)
+        return False
+    
 
 # ---------------------------------------------------------
 def create_excel_with_table_in_folder(folder_path, file_name):
@@ -614,22 +620,22 @@ def create_excel_with_table_in_folder(folder_path, file_name):
 
     # Define the data
     data = {
-        "Database check": [
-            "Check if service interrupted/Any inconsistencies with logging on",
-            "Memory/CPU usage",
-            "Disk space usage",
-            "DB lock check",
-            "System Dumps",
-            "Backup check",
-            "Certificate check",
+        'Database check': [
+            'Check if service interrupted/Any inconsistencies with logging on',
+            'Memory/CPU usage',
+            'Disk space usage',
+            'DB lock check',
+            'System Dumps',
+            'Backup check',
+            'Certificate check'
         ],
-        "Monday": ["", "", "", "", "", "", ""],
-        "Tuesday": ["", "", "", "", "", "", ""],
-        "Wednesday": ["", "", "", "", "", "", ""],
-        "Thursday": ["", "", "", "", "", "", ""],
-        "Friday": ["", "", "", "", "", "", ""],
-        "Saturday": ["", "", "", "", "", "", ""],
-        "Sunday": ["", "", "", "", "", "", ""],
+        'Monday': ['', '', '', '', '', '', ''],
+        'Tuesday': ['', '', '', '', '', '', ''],
+        'Wednesday': ['', '', '', '', '', '', ''],
+        'Thursday': ['', '', '', '', '', '', ''],
+        'Friday': ['', '', '', '', '', '', ''],
+        'Saturday': ['', '', '', '', '', '', ''],
+        'Sunday': ['', '', '', '', '', '', '']
     }
 
     # Create a DataFrame from the data
@@ -865,10 +871,12 @@ def main():
 
         # perform_checks(driver, ans1)
 
-        loginpic = save_screenshot(driver, "TestDB", "login.png")
+        save_screenshot(driver,"TestDB","login.png")
         print("Screenshot saved.")
-
-        selectDatabase(driver, "Training", "TESTDB@DHB", "TestDB")
+        # driver.execute_script("document.body.style.zoom='80%'")
+        # time.sleep(5)
+        
+        selectDatabase(driver,"Training", "TESTDB@DHB","TestDB")
         # selectDatabase(driver,"Training", "DHB@DHB","TestDB")
 
         check_and_click_elements(driver)
@@ -879,24 +887,24 @@ def main():
         WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.XPATH, "//*"))
         )
-
-        backupSuccessful, backUpText = check_last_update_successful(driver, current_day)
-        print("-" * 100)
+        
+        backupSuccessful = check_last_update_successful(driver, current_day)
+        print("-"*100)
         print("backups check", backupSuccessful)
-
-        click_element_by_partial_id(driver, "--lastbackup")
-
+        
+        click_element_by_partial_id(driver,"--lastbackup")
+        
         time.sleep(4)
         driver.execute_script("document.body.style.zoom='80%'")
         WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.XPATH, "//*"))
+            EC.presence_of_element_located((By.XPATH, '//*'))
         )
-        save_screenshot(driver, "TestDB", "Backups.png")
+        save_screenshot(driver,"TestDB","Backups.png")
         driver.execute_script("document.body.style.zoom='100%';")
         WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.XPATH, "//*"))
+            EC.presence_of_element_located((By.XPATH, '//*'))
         )
-
+        
         click_back_icon(driver)
         time.sleep(4)
 
@@ -905,63 +913,66 @@ def main():
         click_element_by_id(driver, "idSearchFieldOVP-search")
 
         time.sleep(10)
-
-        CPU_image = save_screenshot(driver, "TestDB", "CPU.png")
+        
+        save_screenshot(driver,"TestDB","CPU.png")
         print("Screenshot saved.")
-
-        # Search for Alerts
-        search_input_field(driver, "idSearchFieldOVP-I", "Alerts")
+        
+        # Search for Alerts 
+        search_input_field(driver, 'idSearchFieldOVP-I', 'Alerts')
         click_element_by_id(driver, "idSearchFieldOVP-search")
 
         time.sleep(10)
-
-        Alerts_image = save_screenshot(driver, "TestDB", "Alerts.png")
+        
+        save_screenshot(driver,"TestDB","Alerts.png")
         print("Screenshot saved.")
-
-        # Search for Services
-        search_input_field(driver, "idSearchFieldOVP-I", "Services")
+        
+        # Search for Services 
+        search_input_field(driver, 'idSearchFieldOVP-I', 'Services')
         click_element_by_id(driver, "idSearchFieldOVP-search")
 
         time.sleep(10)
-
-        Services_image = save_screenshot(driver, "TestDB", "Services.png")
+        
+        save_screenshot(driver,"TestDB","Services.png")
         print("Screenshot saved.")
-
-        # Search for Memory U
-        search_input_field(driver, "idSearchFieldOVP-I", "Memory U")
+        
+        # Search for Memory U 
+        search_input_field(driver, 'idSearchFieldOVP-I', 'Memory U')
         click_element_by_id(driver, "idSearchFieldOVP-search")
 
         time.sleep(10)
-
-        Memory_image = save_screenshot(driver, "TestDB", "Memory.png")
+        
+        save_screenshot(driver,"TestDB","Memory.png")
         print("Screenshot saved.")
-
+        
         # Search for Disk
         search_input_field(driver, "idSearchFieldOVP-I", "Disk")
         click_element_by_id(driver, "idSearchFieldOVP-search")
 
         time.sleep(10)
-
-        Disk_image = save_screenshot(driver, "TestDB", "Disk.png")
+        
+        save_screenshot(driver,"TestDB","Disk.png")
         print("Screenshot saved.")
-
+        
         # Search for Data Encryption
         search_input_field(driver, "idSearchFieldOVP-I", "Data En")
         click_element_by_id(driver, "idSearchFieldOVP-search")
-
+        
         time.sleep(10)
-
-        Data_Encryption_image = save_screenshot(driver, "TestDB", "Encryption.png")
+        
+        save_screenshot(driver,"TestDB","Encryption.png")
         print("Screenshot saved.")
-
+        
         # Search for Trust Configuration - Certification
         search_input_field(driver, "idSearchFieldOVP-I", "Trust Configuration")
         click_element_by_id(driver, "idSearchFieldOVP-search")
 
         time.sleep(10)
-
-        Certification_image = save_screenshot(driver, "TestDB", "Certification.png")
+        
+        save_screenshot(driver,"TestDB","Certification.png")
         print("Screenshot saved.")
+        
+        
+        
 
     except Exception as e:
         print(f"An error occurred: {e}")
