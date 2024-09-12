@@ -589,14 +589,14 @@ def check_last_update_successful(driver, current_day):
             )
         else:
             edit_excel(
-                "./TestDB/Output.xlsx", "Daily Checks", current_day, 7, "warning", 0
+                "./TestDB/Output.xlsx", "Daily Checks", current_day, 7, sucText, 0
             )
 
-        return is_last_update_successful
+        return is_last_update_successful, sucText
     except Exception as e:
         print("Failed to check database")
         edit_excel("./TestDB/Output.xlsx", "Daily Checks", current_day, 7, "failed", -1)
-        return False
+        return False ,None
 
 
 # ---------------------------------------------------------
@@ -902,6 +902,7 @@ def main():
         Disk = -2
         Data_Encryption = -2
         Trust_Configuration = -2
+        backUpText = "No Run"
 
         # Bypass the security warning
         bypass_security_warning(driver)
@@ -933,7 +934,7 @@ def main():
             EC.presence_of_element_located((By.XPATH, "//*"))
         )
 
-        backupSuccessful = check_last_update_successful(driver, current_day)
+        backupSuccessful, backUpText = check_last_update_successful(driver, current_day)
         print("-" * 100)
         print("backups check", backupSuccessful)
 
@@ -1025,8 +1026,7 @@ def main():
             "Login": loginans1,
             "Logged in": (loginpic, "TestDB/login.png"),
             "Database_screenshot": (backup_ans, "TestDB/backup.png"),
-            # "Back up : " + backUpText: backupSuccessful,
-            "Back up : ": backupSuccessful,
+            "Back up : " + backUpText: backupSuccessful,
             "CPU": (CPU_image, "TestDB/CPU.png"),
             "Alerts": (Alerts_image, "TestDB/Alerts.png"),
             "Services": (Services_image, "TestDB/Services.png"),
