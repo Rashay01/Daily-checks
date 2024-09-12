@@ -527,15 +527,15 @@ def save_screenshot(driver, folder_path, file_name):
         # Save the screenshot
         driver.execute_script("document.body.style.zoom='80%'")
         WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.XPATH, '//*'))
+            EC.presence_of_element_located((By.XPATH, "//*"))
         )
         driver.save_screenshot(screenshot_path)
-        
+
         driver.execute_script("document.body.style.zoom='100%'")
         WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.XPATH, '//*'))
+            EC.presence_of_element_located((By.XPATH, "//*"))
         )
-        print(f'Screenshot saved as {screenshot_path}.')
+        print(f"Screenshot saved as {screenshot_path}.")
 
     except Exception as e:
         print(f"An error occurred while saving the screenshot: {e}")
@@ -588,14 +588,16 @@ def check_last_update_successful(driver, current_day):
                 "./TestDB/Output.xlsx", "Daily Checks", current_day, 7, "Completed", 1
             )
         else:
-            edit_excel("./TestDB/Output.xlsx", "Daily Checks", current_day, 7, "warning", 0)
-        
+            edit_excel(
+                "./TestDB/Output.xlsx", "Daily Checks", current_day, 7, "warning", 0
+            )
+
         return is_last_update_successful
     except Exception as e:
-        print('Failed to check database')
-        edit_excel("./TestDB/Output.xlsx", "Daily Checks", current_day, 7, "failed",-1)
+        print("Failed to check database")
+        edit_excel("./TestDB/Output.xlsx", "Daily Checks", current_day, 7, "failed", -1)
         return False
-    
+
 
 # ---------------------------------------------------------
 def create_excel_with_table_in_folder(folder_path, file_name):
@@ -620,22 +622,22 @@ def create_excel_with_table_in_folder(folder_path, file_name):
 
     # Define the data
     data = {
-        'Database check': [
-            'Check if service interrupted/Any inconsistencies with logging on',
-            'Memory/CPU usage',
-            'Disk space usage',
-            'DB lock check',
-            'System Dumps',
-            'Backup check',
-            'Certificate check'
+        "Database check": [
+            "Check if service interrupted/Any inconsistencies with logging on",
+            "Memory/CPU usage",
+            "Disk space usage",
+            "DB lock check",
+            "System Dumps",
+            "Backup check",
+            "Certificate check",
         ],
-        'Monday': ['', '', '', '', '', '', ''],
-        'Tuesday': ['', '', '', '', '', '', ''],
-        'Wednesday': ['', '', '', '', '', '', ''],
-        'Thursday': ['', '', '', '', '', '', ''],
-        'Friday': ['', '', '', '', '', '', ''],
-        'Saturday': ['', '', '', '', '', '', ''],
-        'Sunday': ['', '', '', '', '', '', '']
+        "Monday": ["", "", "", "", "", "", ""],
+        "Tuesday": ["", "", "", "", "", "", ""],
+        "Wednesday": ["", "", "", "", "", "", ""],
+        "Thursday": ["", "", "", "", "", "", ""],
+        "Friday": ["", "", "", "", "", "", ""],
+        "Saturday": ["", "", "", "", "", "", ""],
+        "Sunday": ["", "", "", "", "", "", ""],
     }
 
     # Create a DataFrame from the data
@@ -708,48 +710,84 @@ from datetime import datetime
 
 
 def create_html_with_buttons(filename, function_statuses):
-    """
-    Creates an HTML file with buttons indicating the status of each function and includes images in the buttons.
-
-    :param filename: Name of the HTML file to be created
-    :param function_statuses: Dictionary with function names as keys and their statuses as values
-    """
     html_template = """
     <!DOCTYPE html>
-    <html>
+    <html lang="en">
     <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Function Status</title>
         <style>
-            .button {{
-                padding: 10px 20px;
-                margin: 5px;
-                border: none;
-                font-size: 16px;
-                cursor: pointer;
-                background-color: grey; /* default color */
-                color: white;
+            body {{
+                font-family: 'Arial', sans-serif;
+                background-color: #f3f4f6;
+                color: #32363a;
+                margin: 0;
+                padding: 20px;
+            }}
+            h1 {{
+                color: #0a6ed1;
+                text-align: center;
+            }}
+            .roadmap-container {{
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                width: 100%;
+                max-width: 800px;
+                margin: auto;
+            }}
+            .roadmap-item {{
+                display: flex;
+                align-items: center;
+                padding: 15px;
+                margin: 10px 0;
+                border: 1px solid #ddd;
                 border-radius: 5px;
-                transition: background-color 0.3s ease;
+                background-color: white;
+                width: 100%;
             }}
-            .success {{
-                background-color: green; /* Turns green when successful */
+            .roadmap-item .emoji {{
+                font-size: 24px;
+                margin-right: 15px;
             }}
-            .failure {{
-                background-color: red; /* Red for failure */
+            .roadmap-item.success {{
+                border-left: 5px solid green;
             }}
-            .warning {{
-                background-color: #ffc107; /* Yellow for warning */
+            .roadmap-item.failure {{
+                border-left: 5px solid red;
             }}
-            .button a {{
-                text-decoration: none;
+            .roadmap-item.warning {{
+                border-left: 5px solid orange;
+            }}
+            .roadmap-item.norun {{
+                border-left: 5px solid gray;
+            }}
+            .roadmap-item .button {{
+                margin-left: auto;
+                padding: 10px 20px;
+                background-color: #0a6ed1;
                 color: white;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+            }}
+            footer {{
+                margin-top: 20px;
+                text-align: center;
+                color: #607d8b;
             }}
         </style>
     </head>
     <body>
-        <h1>Function Status Report</h1>
-        <p>Generated on {timestamp}</p>
-        {buttons}
+        <h1>Function Status Roadmap</h1>
+        <p style="text-align:center;">Generated on {timestamp}</p>
+        <div class="roadmap-container">
+            {roadmap_items}
+        </div>
+        <footer>
+            &copy; {year} SAP HANA - Automated Status Report
+        </footer>
         <script>
             function openImage(imagePath) {{
                 window.open(imagePath, '_blank');
@@ -759,51 +797,58 @@ def create_html_with_buttons(filename, function_statuses):
     </html>
     """
 
-    buttons = ""
+    roadmap_items = ""
     for func_name, status in function_statuses.items():
-        # Handle boolean values as well as string statuses
+        # Determine the appropriate emoji and class based on status
         if status == 1:
+            emoji = "✅"
             color_class = "success"
         elif status == -1:
+            emoji = "❌"
             color_class = "failure"
         elif status == 0:
+            emoji = "⚠️"
             color_class = "warning"
         elif status == -2:
+            emoji = "🚫"
             color_class = "norun"
-        # else:
-        #     color_class = "success" if status == "success" else "failure"
 
         screenshot_path = ""  # Initialize to avoid UnboundLocalError
 
         if isinstance(status, tuple):
             status, screenshot_path = status
 
-        # Add the button with text and link to the full-screen image
+        # Add roadmap item
         if screenshot_path:
-            buttons += f'<button class="button {color_class}" onclick="openImage(\'{screenshot_path}\')">{func_name}</button>\n'
+            roadmap_items += f"""
+            <div class="roadmap-item {color_class}">
+                <span class="emoji">{emoji}</span>
+                <span>{func_name}</span>
+                <button class="button" onclick="openImage('{screenshot_path}')">View Screenshot</button>
+            </div>
+            """
         else:
-            buttons += f'<button class="button {color_class}">{func_name}</button>\n'
+            roadmap_items += f"""
+            <div class="roadmap-item {color_class}">
+                <span class="emoji">{emoji}</span>
+                <span>{func_name}</span>
+            </div>
+            """
 
-    # Fill the template with the timestamp and buttons
+    # Fill the template with the timestamp, roadmap items, and current year
     html_content = html_template.format(
-        timestamp=datetime.now().strftime("%Y-%m-%d %H:%M:%S"), buttons=buttons
+        timestamp=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        roadmap_items=roadmap_items,
+        year=datetime.now().year,
     )
 
-    with open(filename, "w") as file:
+    with open(filename, "w", encoding="utf-8") as file:
         file.write(html_content)
 
     print(f"HTML file '{filename}' created successfully.")
 
 
 #  -------------------------------------------------------------------------
-images = [
-    {"src": "TestDB/login.png", "alt": "Login"},
-    {"src": "TestDB/databaseSelected.png", "alt": "databaseSelected.png"},
-    {"src": "TestDB/Backups.png", "alt": "Backups.png"},
-    {"src": "TestDB/CPU.png", "alt": "CPU.png"},
-]
-
-
 def insert_images_into_html(file_path, images):
     # Open and read the HTML file
     with open(file_path, "r") as file:
@@ -871,12 +916,12 @@ def main():
 
         # perform_checks(driver, ans1)
 
-        save_screenshot(driver,"TestDB","login.png")
+        save_screenshot(driver, "TestDB", "login.png")
         print("Screenshot saved.")
         # driver.execute_script("document.body.style.zoom='80%'")
         # time.sleep(5)
-        
-        selectDatabase(driver,"Training", "TESTDB@DHB","TestDB")
+
+        selectDatabase(driver, "Training", "TESTDB@DHB", "TestDB")
         # selectDatabase(driver,"Training", "DHB@DHB","TestDB")
 
         check_and_click_elements(driver)
@@ -887,24 +932,24 @@ def main():
         WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.XPATH, "//*"))
         )
-        
+
         backupSuccessful = check_last_update_successful(driver, current_day)
-        print("-"*100)
+        print("-" * 100)
         print("backups check", backupSuccessful)
-        
-        click_element_by_partial_id(driver,"--lastbackup")
-        
+
+        click_element_by_partial_id(driver, "--lastbackup")
+
         time.sleep(4)
         driver.execute_script("document.body.style.zoom='80%'")
         WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.XPATH, '//*'))
+            EC.presence_of_element_located((By.XPATH, "//*"))
         )
-        save_screenshot(driver,"TestDB","Backups.png")
+        backup_ans = save_screenshot(driver, "TestDB", "Backups.png")
         driver.execute_script("document.body.style.zoom='100%';")
         WebDriverWait(driver, 10).until(
-            EC.presence_of_element_located((By.XPATH, '//*'))
+            EC.presence_of_element_located((By.XPATH, "//*"))
         )
-        
+
         click_back_icon(driver)
         time.sleep(4)
 
@@ -913,66 +958,63 @@ def main():
         click_element_by_id(driver, "idSearchFieldOVP-search")
 
         time.sleep(10)
-        
-        save_screenshot(driver,"TestDB","CPU.png")
+
+        CPU_image = save_screenshot(driver, "TestDB", "CPU.png")
         print("Screenshot saved.")
-        
-        # Search for Alerts 
-        search_input_field(driver, 'idSearchFieldOVP-I', 'Alerts')
+
+        # Search for Alerts
+        search_input_field(driver, "idSearchFieldOVP-I", "Alerts")
         click_element_by_id(driver, "idSearchFieldOVP-search")
 
         time.sleep(10)
-        
-        save_screenshot(driver,"TestDB","Alerts.png")
+
+        Alerts_image = save_screenshot(driver, "TestDB", "Alerts.png")
         print("Screenshot saved.")
-        
-        # Search for Services 
-        search_input_field(driver, 'idSearchFieldOVP-I', 'Services')
+
+        # Search for Services
+        search_input_field(driver, "idSearchFieldOVP-I", "Services")
         click_element_by_id(driver, "idSearchFieldOVP-search")
 
         time.sleep(10)
-        
-        save_screenshot(driver,"TestDB","Services.png")
+
+        Services_image = save_screenshot(driver, "TestDB", "Services.png")
         print("Screenshot saved.")
-        
-        # Search for Memory U 
-        search_input_field(driver, 'idSearchFieldOVP-I', 'Memory U')
+
+        # Search for Memory U
+        search_input_field(driver, "idSearchFieldOVP-I", "Memory U")
         click_element_by_id(driver, "idSearchFieldOVP-search")
 
         time.sleep(10)
-        
-        save_screenshot(driver,"TestDB","Memory.png")
+
+        Memory_image = save_screenshot(driver, "TestDB", "Memory.png")
         print("Screenshot saved.")
-        
+
         # Search for Disk
         search_input_field(driver, "idSearchFieldOVP-I", "Disk")
         click_element_by_id(driver, "idSearchFieldOVP-search")
 
         time.sleep(10)
-        
-        save_screenshot(driver,"TestDB","Disk.png")
+
+        Disk_image = save_screenshot(driver, "TestDB", "Disk.png")
         print("Screenshot saved.")
-        
+
         # Search for Data Encryption
         search_input_field(driver, "idSearchFieldOVP-I", "Data En")
         click_element_by_id(driver, "idSearchFieldOVP-search")
-        
+
         time.sleep(10)
-        
-        save_screenshot(driver,"TestDB","Encryption.png")
+
+        Data_Encryption_image = save_screenshot(driver, "TestDB", "Encryption.png")
         print("Screenshot saved.")
-        
+
         # Search for Trust Configuration - Certification
         search_input_field(driver, "idSearchFieldOVP-I", "Trust Configuration")
         click_element_by_id(driver, "idSearchFieldOVP-search")
 
         time.sleep(10)
-        
-        save_screenshot(driver,"TestDB","Certification.png")
+
+        Certification_image = save_screenshot(driver, "TestDB", "Certification.png")
         print("Screenshot saved.")
-        
-        
-        
 
     except Exception as e:
         print(f"An error occurred: {e}")
@@ -982,12 +1024,13 @@ def main():
         function_statuses = {
             "Login": loginans1,
             "Logged in": (loginpic, "TestDB/login.png"),
-            "Database_screenshot": backup_ans,
-            "Back up : " + backUpText: backupSuccessful,
+            "Database_screenshot": (backup_ans, "TestDB/backup.png"),
+            # "Back up : " + backUpText: backupSuccessful,
+            "Back up : ": backupSuccessful,
             "CPU": (CPU_image, "TestDB/CPU.png"),
             "Alerts": (Alerts_image, "TestDB/Alerts.png"),
             "Services": (Services_image, "TestDB/Services.png"),
-            "Memory": (Services_image, "TestDB/Memory.png"),
+            "Memory": (Memory_image, "TestDB/Memory.png"),
             "Disk": (Disk_image, "TestDB/Disk.png"),
             "Data Encryption": (Data_Encryption_image, "TestDB/Encryption.png"),
             "Trust Configuration": (Certification_image, "TestDB/Certification.png"),
