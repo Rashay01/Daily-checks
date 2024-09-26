@@ -12,8 +12,11 @@ import pandas as pd
 import openpyxl
 from openpyxl.styles import PatternFill
 from datetime import datetime
+import webbrowser
 
 load_dotenv()
+
+db_name = "TestDB"
 
 
 def get_current_day_in_words():
@@ -585,18 +588,25 @@ def check_last_update_successful(driver, current_day):
         is_correct_day = True
         if is_correct_day and is_last_update_successful:
             edit_excel(
-                "./TestDB/Output.xlsx", "Daily Checks", current_day, 7, "Completed", 1
+                f"./{db_name}/Output.xlsx",
+                "Daily Checks",
+                current_day,
+                7,
+                "Completed",
+                1,
             )
         else:
             edit_excel(
-                "./TestDB/Output.xlsx", "Daily Checks", current_day, 7, sucText, 0
+                f"./{db_name}/Output.xlsx", "Daily Checks", current_day, 7, sucText, 0
             )
 
         return is_last_update_successful, sucText
     except Exception as e:
         print("Failed to check database")
-        edit_excel("./TestDB/Output.xlsx", "Daily Checks", current_day, 7, "failed", -1)
-        return False ,None
+        edit_excel(
+            f"./{db_name}/Output.xlsx", "Daily Checks", current_day, 7, "failed", -1
+        )
+        return False, None
 
 
 # ---------------------------------------------------------
@@ -706,9 +716,6 @@ def open_html_in_browser(html_file):
 
 
 # --------------------------------------------------------------------------
-from datetime import datetime
-
-
 def create_html_with_buttons(filename, function_statuses):
     html_template = """
     <!DOCTYPE html>
@@ -847,6 +854,9 @@ def create_html_with_buttons(filename, function_statuses):
 
     print(f"HTML file '{filename}' created successfully.")
 
+    webbrowser.open(f"file://{os.path.realpath(filename)}")
+    print(f"HTML file '{filename}' and opened successfully.")
+
 
 #  -------------------------------------------------------------------------
 def insert_images_into_html(file_path, images):
@@ -882,7 +892,7 @@ def main():
     driver = webdriver.Chrome(service=service, options=chrome_options)
     driver.set_window_size(1920, 1580)
     current_day = get_current_day_in_words()
-    create_excel_with_table_in_folder("TestDB", "Output.xlsx")
+    create_excel_with_table_in_folder(db_name, "Output.xlsx")
 
     try:
         # create_html_with_buttons("dynamic_buttons.html")
@@ -917,13 +927,13 @@ def main():
 
         # perform_checks(driver, ans1)
 
-        save_screenshot(driver, "TestDB", "login.png")
+        save_screenshot(driver, db_name, "login.png")
         print("Screenshot saved.")
         # driver.execute_script("document.body.style.zoom='80%'")
         # time.sleep(5)
 
-        selectDatabase(driver, "Training", "TESTDB@DHB", "TestDB")
-        # selectDatabase(driver,"Training", "DHB@DHB","TestDB")
+        selectDatabase(driver, "Training", "TESTDB@DHB", db_name)
+        # selectDatabase(driver,"Training", "DHB@DHB","db_name")
 
         check_and_click_elements(driver)
 
@@ -945,7 +955,7 @@ def main():
         WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.XPATH, "//*"))
         )
-        backup_ans = save_screenshot(driver, "TestDB", "Backups.png")
+        backup_ans = save_screenshot(driver, db_name, "Backups.png")
         driver.execute_script("document.body.style.zoom='100%';")
         WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.XPATH, "//*"))
@@ -960,7 +970,7 @@ def main():
 
         time.sleep(10)
 
-        CPU_image = save_screenshot(driver, "TestDB", "CPU.png")
+        CPU_image = save_screenshot(driver, db_name, "CPU.png")
         print("Screenshot saved.")
 
         # Search for Alerts
@@ -969,7 +979,7 @@ def main():
 
         time.sleep(10)
 
-        Alerts_image = save_screenshot(driver, "TestDB", "Alerts.png")
+        Alerts_image = save_screenshot(driver, db_name, "Alerts.png")
         print("Screenshot saved.")
 
         # Search for Services
@@ -978,7 +988,7 @@ def main():
 
         time.sleep(10)
 
-        Services_image = save_screenshot(driver, "TestDB", "Services.png")
+        Services_image = save_screenshot(driver, db_name, "Services.png")
         print("Screenshot saved.")
 
         # Search for Memory U
@@ -987,7 +997,7 @@ def main():
 
         time.sleep(10)
 
-        Memory_image = save_screenshot(driver, "TestDB", "Memory.png")
+        Memory_image = save_screenshot(driver, db_name, "Memory.png")
         print("Screenshot saved.")
 
         # Search for Disk
@@ -996,7 +1006,7 @@ def main():
 
         time.sleep(10)
 
-        Disk_image = save_screenshot(driver, "TestDB", "Disk.png")
+        Disk_image = save_screenshot(driver, db_name, "Disk.png")
         print("Screenshot saved.")
 
         # Search for Data Encryption
@@ -1005,7 +1015,7 @@ def main():
 
         time.sleep(10)
 
-        Data_Encryption_image = save_screenshot(driver, "TestDB", "Encryption.png")
+        Data_Encryption_image = save_screenshot(driver, db_name, "Encryption.png")
         print("Screenshot saved.")
 
         # Search for Trust Configuration - Certification
@@ -1014,7 +1024,7 @@ def main():
 
         time.sleep(10)
 
-        Certification_image = save_screenshot(driver, "TestDB", "Certification.png")
+        Certification_image = save_screenshot(driver, db_name, "Certification.png")
         print("Screenshot saved.")
 
     except Exception as e:
@@ -1024,16 +1034,19 @@ def main():
         # Close the browser
         function_statuses = {
             "Login": loginans1,
-            "Logged in": (loginpic, "TestDB/login.png"),
-            "Database_screenshot": (backup_ans, "TestDB/backup.png"),
+            "Logged in": (loginpic, db_name + "/login.png"),
+            "Database_screenshot": (backup_ans, db_name + "/Backups.png"),
             "Back up : " + backUpText: backupSuccessful,
-            "CPU": (CPU_image, "TestDB/CPU.png"),
-            "Alerts": (Alerts_image, "TestDB/Alerts.png"),
-            "Services": (Services_image, "TestDB/Services.png"),
-            "Memory": (Memory_image, "TestDB/Memory.png"),
-            "Disk": (Disk_image, "TestDB/Disk.png"),
-            "Data Encryption": (Data_Encryption_image, "TestDB/Encryption.png"),
-            "Trust Configuration": (Certification_image, "TestDB/Certification.png"),
+            "CPU": (CPU_image, db_name + "/CPU.png"),
+            "Alerts": (Alerts_image, db_name + "/Alerts.png"),
+            "Services": (Services_image, db_name + "/Services.png"),
+            "Memory": (Memory_image, db_name + "/Memory.png"),
+            "Disk": (Disk_image, db_name + "/Disk.png"),
+            "Data Encryption": (Data_Encryption_image, db_name + "/Encryption.png"),
+            "Trust Configuration": (
+                Certification_image,
+                db_name + "/Certification.png",
+            ),
         }
         create_html_with_buttons("daily-checks.html", function_statuses)
         driver.quit()
